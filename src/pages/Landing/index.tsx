@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { TitleBar } from '@/components/layout/TitleBar';
 import { cn } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings';
-import logoPng from '@/assets/logo.png';
+import { brandLogo, APP_NAME, APP_NAME_DISPLAY } from '@/lib/brand';
 import minimaxIcon from '@/assets/providers/minimax.svg';
 import moonshotIcon from '@/assets/providers/moonshot.svg';
 import openaiIcon from '@/assets/providers/openai.svg';
@@ -77,7 +77,7 @@ const LANDING_COPY = {
       titleLead: '把 AI 入口从命令行',
       titleAccent: '搬回桌面',
       description:
-        'clawPlus 把模型接入、消息频道、智能体协作、定时任务和 Token 观察整合进一个温和但强悍的桌面中控。你不用记住脚本和 YAML，也能把 OpenClaw 跑得井井有条。',
+        `${APP_NAME_DISPLAY} 把模型接入、消息频道、智能体协作、定时任务和 Token 观察整合进一个温和但强悍的桌面中控。你不用记住脚本和 YAML，也能把 OpenClaw 跑得井井有条。`,
       primaryReady: '进入工作台',
       primarySetup: '开始配置',
       secondary: '浏览能力模块',
@@ -177,21 +177,21 @@ const LANDING_COPY = {
             badge: '24h running',
             items: [
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: '09:00 日报汇总',
                 tag: 'cron',
                 text: '按智能体分发站会摘要与待办',
               },
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: '渠道巡检',
                 tag: 'watch',
                 text: '失败任务保留状态与下次运行时间',
               },
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: '模型健康检查',
                 tag: 'guard',
@@ -208,10 +208,10 @@ const LANDING_COPY = {
       },
     },
     value: {
-      kicker: 'Why ClawPlus',
+      kicker: `Why ${APP_NAME}`,
       title: '不是再包一层 UI，而是把 AI 工作流真正变成桌面产品',
       description:
-        '参考站点那种轻盈、可信、层次清晰的落地页节奏，我们把文案落回到 clawPlus 的真实能力上：不吹概念，直接讲模型、频道、智能体、任务和观测怎么协同。',
+        `参考站点那种轻盈、可信、层次清晰的落地页节奏，我们把文案落回到 ${APP_NAME_DISPLAY} 的真实能力上：不吹概念，直接讲模型、频道、智能体、任务和观测怎么协同。`,
       items: [
         {
           title: '看得见的状态',
@@ -219,7 +219,7 @@ const LANDING_COPY = {
         },
         {
           title: '能编排的智能体',
-          text: 'ClawPlus 不止是聊天窗口。它把 agent 角色、渠道绑定与定时任务放在同一套桌面操作流里。',
+          text: `${APP_NAME} 不止是聊天窗口。它把 agent 角色、渠道绑定与定时任务放在同一套桌面操作流里。`,
         },
         {
           title: '适合长期使用',
@@ -260,7 +260,7 @@ const LANDING_COPY = {
     workflow: {
       kicker: 'Workflow',
       title: '从接入到自动运行，四步就能成形',
-      description: '页面是营销面的，但内容和路径必须真实可落地。下面这条链路就是 clawPlus 在项目里已经成立的核心叙事。',
+      description: `页面是营销面的，但内容和路径必须真实可落地。下面这条链路就是 ${APP_NAME_DISPLAY} 在项目里已经成立的核心叙事。`,
       steps: [
         {
           title: '连接模型提供商',
@@ -314,7 +314,7 @@ const LANDING_COPY = {
         },
         {
           question: '没有 OpenClaw 经验也能上手吗？',
-          answer: '可以。clawPlus 把首次引导、环境检查和 Provider 配置做成了 setup 流程，目标就是让命令行经验不再成为门槛。',
+          answer: `可以。${APP_NAME_DISPLAY} 把首次引导、环境检查和 Provider 配置做成了 setup 流程，目标就是让命令行经验不再成为门槛。`,
         },
         {
           question: '前端会直接请求 Gateway 或频道接口吗？',
@@ -330,14 +330,14 @@ const LANDING_COPY = {
       kicker: 'Ready',
       title: '让你的 AI 配置、渠道和自动化，从零散脚本变成一块干净的桌面面板',
       description:
-        '如果你已经在用 OpenClaw，clawPlus 会是更适合长期协作的那层界面；如果你刚准备开始，它也能把第一步做得更轻。',
+        `如果你已经在用 OpenClaw，${APP_NAME_DISPLAY} 会是更适合长期协作的那层界面；如果你刚准备开始，它也能把第一步做得更轻。`,
       primaryReady: '打开工作台',
       primarySetup: '进入向导',
       secondary: '回到顶部',
     },
     footer: {
-      brandLine: 'ClawPlus · The Desktop Interface for OpenClaw AI Agents',
-      note: '落地页结构参考了你提供的营销站点，但内容、信息层级和视觉组件都已经替换成适合 clawPlus 的表达。',
+      brandLine: `${APP_NAME} · The Desktop Interface for OpenClaw AI Agents`,
+      note: `落地页结构参考了你提供的营销站点，但内容、信息层级和视觉组件都已经替换成适合 ${APP_NAME_DISPLAY} 的表达。`,
       top: '顶部',
     },
   },
@@ -360,7 +360,7 @@ const LANDING_COPY = {
       titleLead: 'Bring your AI stack',
       titleAccent: 'back to the desktop',
       description:
-        'clawPlus turns model setup, channel routing, agent coordination, scheduled tasks, and token visibility into one warm but capable control surface. No script juggling, no YAML hunting.',
+        `${APP_NAME_DISPLAY} turns model setup, channel routing, agent coordination, scheduled tasks, and token visibility into one warm but capable control surface. No script juggling, no YAML hunting.`,
       primaryReady: 'Open Workspace',
       primarySetup: 'Start Setup',
       secondary: 'See capabilities',
@@ -460,21 +460,21 @@ const LANDING_COPY = {
             badge: '24h running',
             items: [
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: '09:00 Daily digest',
                 tag: 'cron',
                 text: 'Distribute summaries through the assigned agent',
               },
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: 'Channel inspection',
                 tag: 'watch',
                 text: 'Keep failures visible with next-run timing',
               },
               {
-                icon: logoPng,
+                icon: brandLogo,
                 invert: false,
                 name: 'Provider health check',
                 tag: 'guard',
@@ -491,10 +491,10 @@ const LANDING_COPY = {
       },
     },
     value: {
-      kicker: 'Why ClawPlus',
+      kicker: `Why ${APP_NAME}`,
       title: 'This is not just another shell over AI tools. It is a desktop workflow surface.',
       description:
-        'The structure is inspired by your reference landing page, but every message here is grounded in what clawPlus already does: providers, channels, agents, scheduling, and usage visibility.',
+        `The structure is inspired by your reference landing page, but every message here is grounded in what ${APP_NAME_DISPLAY} already does: providers, channels, agents, scheduling, and usage visibility.`,
       items: [
         {
           title: 'Visible system state',
@@ -502,7 +502,7 @@ const LANDING_COPY = {
         },
         {
           title: 'Agent orchestration',
-          text: 'clawPlus is more than a chat window. It puts roles, bindings, and scheduled execution into the same interface flow.',
+          text: `${APP_NAME_DISPLAY} is more than a chat window. It puts roles, bindings, and scheduled execution into the same interface flow.`,
         },
         {
           title: 'Built for repeated use',
@@ -613,14 +613,14 @@ const LANDING_COPY = {
       kicker: 'Ready',
       title: 'Turn scattered scripts, channels, and AI configuration into one composed desktop surface',
       description:
-        'If you already use OpenClaw, clawPlus gives that workflow a calmer long-term interface. If you are just starting, it makes the first mile much lighter.',
+        `If you already use OpenClaw, ${APP_NAME_DISPLAY} gives that workflow a calmer long-term interface. If you are just starting, it makes the first mile much lighter.`,
       primaryReady: 'Open Workspace',
       primarySetup: 'Enter Setup',
       secondary: 'Back to top',
     },
     footer: {
-      brandLine: 'ClawPlus · The Desktop Interface for OpenClaw AI Agents',
-      note: 'The overall pacing borrows from your reference site, but the copy, hierarchy, and components are rebuilt to fit clawPlus.',
+      brandLine: `${APP_NAME} · The Desktop Interface for OpenClaw AI Agents`,
+      note: `The overall pacing borrows from your reference site, but the copy, hierarchy, and components are rebuilt to fit ${APP_NAME_DISPLAY}.`,
       top: 'Top',
     },
   },
@@ -704,10 +704,10 @@ export function Landing() {
                 className="flex items-center gap-3 text-left"
               >
                 <div className="landing-panel-strong flex h-11 w-11 items-center justify-center rounded-2xl p-2 shadow-sm">
-                  <img src={logoPng} alt="clawPlus" className="h-7 w-7 object-contain" />
+                  <img src={brandLogo} alt={APP_NAME_DISPLAY} className="h-7 w-7 object-contain" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--landing-coral)]">clawPlus</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--landing-coral)]">{APP_NAME_DISPLAY}</div>
                   <div className="text-sm font-semibold text-[var(--landing-ink)]">{content.footer.brandLine}</div>
                 </div>
               </button>

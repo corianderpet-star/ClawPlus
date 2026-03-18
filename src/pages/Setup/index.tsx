@@ -55,7 +55,7 @@ const STEP = {
 const steps: SetupStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to clawPlus',
+    title: `Welcome to ${APP_NAME_DISPLAY}`,
     description: 'Your AI assistant is ready to be configured',
   },
   {
@@ -76,7 +76,7 @@ const steps: SetupStep[] = [
   {
     id: 'complete',
     title: 'All Set!',
-    description: 'clawPlus is ready to use',
+    description: `${APP_NAME_DISPLAY} is ready to use`,
   },
 ];
 
@@ -112,7 +112,7 @@ import {
   hasConfiguredCredentials,
   pickPreferredAccount,
 } from '@/lib/provider-accounts';
-import clawxIcon from '@/assets/logo.png';
+import { brandLogo, APP_NAME_DISPLAY } from '@/lib/brand';
 
 // Use the shared provider registry for setup providers
 const providers = SETUP_PROVIDERS;
@@ -318,7 +318,7 @@ function WelcomeContent() {
   return (
     <div className="text-center space-y-4">
       <div className="mb-4 flex justify-center">
-        <img src={clawxIcon} alt="clawPlus" className="h-16 w-16" />
+        <img src={brandLogo} alt={APP_NAME_DISPLAY} className="h-16 w-16" />
       </div>
       <h2 className="text-xl font-semibold">{t('welcome.title')}</h2>
       <p className="text-muted-foreground">

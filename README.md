@@ -317,7 +317,9 @@ Chain multiple skills together to create sophisticated automation pipelines. Pro
 ```bash
 # Development
 pnpm run init             # Install dependencies + download uv
-pnpm dev                  # Start with hot reload
+pnpm dev                  # Start with hot reload (defaults to ClawPlus brand)
+pnpm dev:imoreme          # Start as ClawPlus brand
+pnpm dev:moreme           # Start as MoremeClaw brand
 
 # Quality
 pnpm lint                 # Run ESLint
@@ -326,13 +328,23 @@ pnpm typecheck            # TypeScript validation
 # Testing
 pnpm test                 # Run unit tests
 
-# Build & Package
+# Build & Package (default brand)
 pnpm run build:vite       # Build frontend only
 pnpm build                # Full production build (with packaging assets)
 pnpm package              # Package for current platform
 pnpm package:mac          # Package for macOS
 pnpm package:win          # Package for Windows
 pnpm package:linux        # Package for Linux
+
+# Build & Package (brand-specific)
+pnpm build:imoreme        # Build ClawPlus brand
+pnpm build:moreme         # Build MoremeClaw brand
+pnpm package:imoreme      # Package ClawPlus for current platform
+pnpm package:moreme       # Package MoremeClaw for current platform
+pnpm package:imoreme:win  # Package ClawPlus for Windows
+pnpm package:moreme:win   # Package MoremeClaw for Windows
+pnpm package:imoreme:mac  # Package ClawPlus for macOS
+pnpm package:moreme:mac   # Package MoremeClaw for macOS
 ```
 
 ### Standalone Landing Page

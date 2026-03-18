@@ -109,37 +109,17 @@ if ($status -eq 'updated') {
   }
   $regKeyW.Close()
 
-  # ── Broadcast WM_SETTINGCHANGE so running programs pick up the change ──
-  # Wrapped in try/catch so a broadcast failure doesn't prevent the script
-  # from reporting success (the registry change is already committed).
-  try {
-    Add-Type -MemberDefinition @'
-      [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-      public static extern IntPtr SendMessageTimeout(
-        IntPtr hWnd,
-        int    Msg,
-        IntPtr wParam,
-        string lParam,
-        int    fuFlags,
-        int    uTimeout,
-        out IntPtr lpdwResult
-      );
-'@ -Name NativeMethods -Namespace OpenClaw
-
-    $result = [IntPtr]::Zero
-    [OpenClaw.NativeMethods]::SendMessageTimeout(
-      [IntPtr]0xffff,   # HWND_BROADCAST
-      0x001A,            # WM_SETTINGCHANGE
-      [IntPtr]::Zero,
-      'Environment',
-      0x0002,            # SMTO_ABORTIFHUNG
-      5000,
-      [ref]$result
-    ) | Out-Null
-  }
-  catch {
-    # Non-fatal: registry is already updated; change takes effect on next login.
-  }
+  # NOTE: WM_SETTINGCHANGE broadcast is intentionally NOT done here.
+  # Broadcasting from PowerShell causes two issues:
+  #   1) Add-Type C# compilation fails on non-English locale systems (encoding
+  #      mismatch between the C# compiler and PowerShell's temp file handling).
+  #   2) When Explorer receives WM_SETTINGCHANGE and rebuilds PATH, environment
+  #      variable references like %NVM_HOME% in System PATH may not be expanded
+  #      correctly (Windows environment-reload ordering race condition), causing
+  #      tools like node/python to "disappear" from PATH.
+  # The NSIS installer broadcasts natively via SendMessage after calling this
+  # script.  Runtime calls (autoInstallCliIfNeeded) skip the broadcast entirely
+  # — the registry change takes effect for new sessions after next login.
 }
 
 Write-Output $status

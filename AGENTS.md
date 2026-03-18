@@ -10,15 +10,18 @@ ClawPlus is a cross-platform **Electron desktop app** (React 19 + Vite + TypeScr
 
 Standard dev commands are in `package.json` scripts and `README.md`. Key ones:
 
-| Task                         | Command               |
-| ---------------------------- | --------------------- |
-| Install deps + download uv   | `pnpm run init`       |
-| Dev server (Vite + Electron) | `pnpm dev`            |
-| Lint (ESLint, auto-fix)      | `pnpm run lint`       |
-| Type check                   | `pnpm run typecheck`  |
-| Unit tests (Vitest)          | `pnpm test`           |
-| E2E tests (Playwright)       | `pnpm run test:e2e`   |
-| Build frontend only          | `pnpm run build:vite` |
+| Task                          | Command               |
+| ----------------------------- | --------------------- |
+| Install deps + download uv    | `pnpm run init`       |
+| Dev server (Vite + Electron)  | `pnpm dev`            |
+| Dev server (MoremeClaw brand) | `pnpm dev:moreme`     |
+| Lint (ESLint, auto-fix)       | `pnpm run lint`       |
+| Type check                    | `pnpm run typecheck`  |
+| Unit tests (Vitest)           | `pnpm test`           |
+| E2E tests (Playwright)        | `pnpm run test:e2e`   |
+| Build frontend only           | `pnpm run build:vite` |
+| Build ClawPlus brand          | `pnpm build:imoreme`  |
+| Build MoremeClaw brand        | `pnpm build:moreme`   |
 
 ### Non-obvious caveats
 
@@ -37,3 +40,12 @@ Standard dev commands are in `package.json` scripts and `README.md`. Key ones:
   - Do not call Gateway HTTP endpoints directly from renderer (`fetch('http://127.0.0.1:18789/...')` etc.). Use Main-process proxy channels (`hostapi:fetch`, `gateway:httpProxy`) to avoid CORS/env drift.
   - Transport policy is Main-owned and fixed as `WS -> HTTP -> IPC fallback`; renderer should not implement protocol switching UI/business logic.
 - **Doc sync rule**: After any functional or architecture change, review `README.md`, `README.zh-CN.md`, and `README.ja-JP.md` for required updates; if behavior/flows/interfaces changed, update docs in the same PR/commit.
+- **Multi-brand architecture (important)**:
+  - The app supports two brands: **ClawPlus** (imoreme) and **MoremeClaw** (moreme), built from the same codebase.
+  - Brand configuration is centralized in `src/lib/brand.ts` (renderer) and `electron/shared/brand.ts` (main process).
+  - Brand-specific env vars live in `.env.imoreme` and `.env.moreme` (tracked in git). All use `VITE_` prefix.
+  - Brand-specific assets (logo, icons) live under `src/assets/brands/<brand>/` and `resources/brands/<brand>/`.
+  - The i18n files use `{{appName}}` interpolation; the default value is set in `src/i18n/index.ts` from the brand config.
+  - **Do not hardcode** "ClawPlus", "clawPlus", "MoremeClaw", or "moremeClaw" in UI-facing code; always use `APP_NAME` / `APP_NAME_DISPLAY` from the brand module.
+  - electron-builder configs: `electron-builder.yml` (imoreme/ClawPlus) and `electron-builder.moreme.yml` (moreme/MoremeClaw).
+  - Build script: `scripts/build-brand.mjs` handles icon copying + vite build + bundling + packaging in one step.

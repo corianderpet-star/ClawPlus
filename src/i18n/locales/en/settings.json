@@ -1,6 +1,6 @@
 {
   "title": "Settings",
-  "subtitle": "Configure your clawPlus experience",
+  "subtitle": "Configure your {{appName}} experience",
   "appearance": {
     "title": "Appearance",
     "description": "Customize the look and feel",
@@ -58,7 +58,7 @@
     "notRequired": "Not required",
     "empty": {
       "title": "No providers configured",
-      "desc": "Add an AI provider to start using clawPlus",
+      "desc": "Add an AI provider to start using {{appName}}",
       "cta": "Add Your First Provider"
     },
     "dialog": {
@@ -139,7 +139,7 @@
     "appLogs": "Application Logs",
     "openFolder": "Open Folder",
     "autoStart": "Auto-start Gateway",
-    "autoStartDesc": "Start Gateway when clawPlus launches",
+    "autoStartDesc": "Start Gateway when {{appName}} launches",
     "proxyTitle": "Proxy",
     "proxyDesc": "Route Electron and Gateway traffic through your local proxy client.",
     "proxyServer": "Proxy Server",
@@ -160,7 +160,7 @@
   },
   "updates": {
     "title": "Updates",
-    "description": "Keep clawPlus up to date",
+    "description": "Keep {{appName}} up to date",
     "autoCheck": "Auto-check for updates",
     "autoCheckDesc": "Check for updates on startup",
     "autoDownload": "Auto-update",
@@ -339,7 +339,7 @@
   },
   "about": {
     "title": "About",
-    "appName": "clawPlus",
+    "appName": "{{appName}}",
     "tagline": "Graphical AI Assistant",
     "basedOn": "Based on OpenClaw",
     "version": "Version {{version}}",

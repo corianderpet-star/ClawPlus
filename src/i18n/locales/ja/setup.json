@@ -1,7 +1,7 @@
 {
   "steps": {
     "welcome": {
-      "title": "clawPlusへようこそ",
+      "title": "{{appName}}へようこそ",
       "description": "AIアシスタントの設定準備が整いました"
     },
     "runtime": {
@@ -22,12 +22,12 @@
     },
     "complete": {
       "title": "完了！",
-      "description": "clawPlusを使用する準備が整いました"
+      "description": "{{appName}}を使用する準備が整いました"
     }
   },
   "welcome": {
-    "title": "clawPlusへようこそ",
-    "description": "clawPlusはOpenClawのグラフィカルインターフェースで、お気に入りのメッセージングプラットフォームでAIアシスタントを簡単に使用できます。",
+    "title": "{{appName}}へようこそ",
+    "description": "{{appName}}はOpenClawのグラフィカルインターフェースで、お気に入りのメッセージングプラットフォームでAIアシスタントを簡単に使用できます。",
     "features": {
       "noCommand": "コマンドライン不要",
       "modernUI": "モダンで美しいインターフェース",
@@ -118,7 +118,7 @@
   },
   "complete": {
     "title": "セットアップ完了！",
-    "subtitle": "clawPlusの構成が完了し、使用準備が整いました。AIアシスタントとのチャットを開始できます。",
+    "subtitle": "{{appName}}の構成が完了し、使用準備が整いました。AIアシスタントとのチャットを開始できます。",
     "provider": "AI プロバイダー",
     "components": "コンポーネント",
     "gateway": "ゲートウェイ",

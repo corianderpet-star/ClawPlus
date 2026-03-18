@@ -1,6 +1,6 @@
 {
   "title": "设置",
-  "subtitle": "配置您的 clawPlus 体验",
+  "subtitle": "配置您的 {{appName}} 体验",
   "appearance": {
     "title": "外观",
     "description": "自定义外观和风格",
@@ -58,7 +58,7 @@
     "notRequired": "非必填",
     "empty": {
       "title": "未配置提供商",
-      "desc": "添加 AI 提供商以开始使用 clawPlus",
+      "desc": "添加 AI 提供商以开始使用 {{appName}}",
       "cta": "添加您的第一个提供商"
     },
     "dialog": {
@@ -139,7 +139,7 @@
     "appLogs": "应用日志",
     "openFolder": "打开文件夹",
     "autoStart": "自动启动网关",
-    "autoStartDesc": "clawPlus 启动时自动启动网关",
+    "autoStartDesc": "{{appName}} 启动时自动启动网关",
     "proxyTitle": "代理",
     "proxyDesc": "让 Electron 和 Gateway 的网络请求都走本地代理客户端。",
     "proxyServer": "代理服务器",
@@ -160,7 +160,7 @@
   },
   "updates": {
     "title": "更新",
-    "description": "保持 clawPlus 最新",
+    "description": "保持 {{appName}} 最新",
     "autoCheck": "自动检查更新",
     "autoCheckDesc": "启动时检查更新",
     "autoDownload": "自动更新",
@@ -339,7 +339,7 @@
   },
   "about": {
     "title": "关于",
-    "appName": "clawPlus",
+    "appName": "{{appName}}",
     "tagline": "图形化 AI 助手",
     "basedOn": "基于 OpenClaw",
     "version": "版本 {{version}}",

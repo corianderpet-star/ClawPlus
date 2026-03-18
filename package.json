@@ -1,6 +1,6 @@
 {
   "name": "ClawPlus",
-  "version": "0.1.24-alpha.17",
+  "version": "0.1.24-alpha.17.1",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@whiskeysockets/baileys",
@@ -19,7 +19,11 @@
   "scripts": {
     "init": "pnpm install && pnpm run uv:download",
     "dev": "vite",
+    "dev:imoreme": "vite --mode imoreme",
+    "dev:moreme": "vite --mode moreme",
     "build": "vite build && zx scripts/bundle-openclaw.mjs && zx scripts/bundle-openclaw-plugins.mjs && electron-builder",
+    "build:imoreme": "zx scripts/build-brand.mjs imoreme",
+    "build:moreme": "zx scripts/build-brand.mjs moreme",
     "build:vite": "vite build",
     "bundle:openclaw-plugins": "zx scripts/bundle-openclaw-plugins.mjs",
     "lint": "eslint . --fix",
@@ -32,6 +36,12 @@
     "uv:download:all": "zx scripts/download-bundled-uv.mjs --all",
     "icons": "zx scripts/generate-icons.mjs",
     "package": "vite build && zx scripts/bundle-openclaw.mjs && zx scripts/bundle-openclaw-plugins.mjs && electron-builder",
+    "package:imoreme": "zx scripts/build-brand.mjs imoreme",
+    "package:moreme": "zx scripts/build-brand.mjs moreme",
+    "package:imoreme:win": "zx scripts/build-brand.mjs imoreme --win",
+    "package:moreme:win": "zx scripts/build-brand.mjs moreme --win",
+    "package:imoreme:mac": "zx scripts/build-brand.mjs imoreme --mac",
+    "package:moreme:mac": "zx scripts/build-brand.mjs moreme --mac",
     "package:mac": "vite build && zx scripts/bundle-openclaw.mjs && zx scripts/bundle-openclaw-plugins.mjs && electron-builder --mac",
     "package:win": "vite build && zx scripts/bundle-openclaw.mjs && zx scripts/bundle-openclaw-plugins.mjs && electron-builder --win",
     "package:linux": "vite build && zx scripts/bundle-openclaw.mjs && zx scripts/bundle-openclaw-plugins.mjs && electron-builder --linux",

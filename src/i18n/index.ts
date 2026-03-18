@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { APP_NAME_DISPLAY } from '@/lib/brand';
 
 // EN
 import enCommon from './locales/en/common.json';
@@ -94,6 +95,9 @@ i18n
         ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup', 'agents', 'approvals'],
         interpolation: {
             escapeValue: false, // React already escapes
+            defaultVariables: {
+                appName: APP_NAME_DISPLAY,
+            },
         },
         react: {
             useSuspense: false,

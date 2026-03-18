@@ -96,6 +96,11 @@
   DetailPrint "Warning: PowerShell PATH update exited with code $0."
 
   _ci_done:
+  ; Broadcast WM_SETTINGCHANGE so Explorer picks up the PATH change.
+  ; Done from NSIS (not PowerShell) to avoid C# Add-Type encoding failures
+  ; on non-English locale systems and the environment-reload race condition
+  ; that can leave %VAR% references unexpanded in PATH.
+  SendMessage 0xFFFF 0x001A 0 "STR:Environment" /TIMEOUT=5000
 !macroend
 
 !macro customUnInstall
@@ -115,6 +120,8 @@
   DetailPrint "Warning: PowerShell PATH removal exited with code $0."
 
   _cu_pathDone:
+  ; Broadcast WM_SETTINGCHANGE so Explorer picks up the PATH removal.
+  SendMessage 0xFFFF 0x001A 0 "STR:Environment" /TIMEOUT=5000
 
   ; Ask user if they want to completely remove all user data
   MessageBox MB_YESNO|MB_ICONQUESTION \

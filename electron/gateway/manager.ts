@@ -476,8 +476,22 @@ export class GatewayManager extends EventEmitter {
     }
     this.connectionMonitor.clear();
 
-    // Check if the gateway process is actually reachable
-    const ready = await probeGatewayReady(this.status.port, 3000);
+    // Check if the gateway process is actually reachable.
+    // Use a generous timeout to handle post-sleep / background-throttling scenarios.
+    let ready = await probeGatewayReady(this.status.port, 5000);
+    if (!ready && this.process?.pid) {
+      // The probe timed out but the process may still be alive and recovering
+      // (e.g. after system sleep).  Verify the PID is still running and retry
+      // once with a longer timeout.
+      try {
+        process.kill(this.process.pid, 0); // throws if process is dead
+        logger.debug('Gateway process still alive (pid=%d), retrying probe with longer timeout', this.process.pid);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        ready = await probeGatewayReady(this.status.port, 8000);
+      } catch {
+        // Process is dead — fall through to throw below.
+      }
+    }
     if (!ready) {
       throw new Error('Gateway process not reachable for WebSocket reconnect');
     }
@@ -772,15 +786,27 @@ export class GatewayManager extends EventEmitter {
       },
       onDead: () => {
         logger.warn('Ping/pong dead-connection detected, closing zombie WebSocket');
+
+        // Capture and change state BEFORE terminating the socket so that the
+        // onCloseAfterHandshake callback (which fires synchronously on
+        // terminate()) does NOT trigger a competing scheduleReconnect() flow.
+        const wasRunning = this.status.state === 'running';
+        if (wasRunning) {
+          this.setStatus({ state: 'reconnecting' });
+        }
+
+        // Stop further ping intervals immediately.
+        this.connectionMonitor.clear();
+
         if (this.ws) {
           try { this.ws.terminate(); } catch { /* ignore */ }
           this.ws = null;
         }
-        if (this.status.state === 'running') {
+
+        if (wasRunning) {
           // Try WebSocket-only reconnect first to avoid killing the process
           void this.reconnectWebSocket().catch(() => {
             logger.warn('WebSocket-only reconnect after dead ping failed, scheduling full reconnect');
-            this.setStatus({ state: 'stopped' });
             this.scheduleReconnect();
           });
         }
@@ -851,7 +877,18 @@ export class GatewayManager extends EventEmitter {
           this.reconnectAttempts = 0;
           return;
         } catch {
-          logger.debug('WebSocket-only reconnect failed, falling back to full start()');
+          logger.debug('WebSocket-only reconnect failed, falling back to full restart');
+        }
+
+        // Kill the old owned process before starting a new one.
+        // Without this the new process fails with "gateway already running"
+        // / "port in use" because the old process is still listening.
+        if (this.process && this.ownsProcess) {
+          logger.info('Stopping stale Gateway process before full restart');
+          const child = this.process;
+          this.process = null;
+          this.ownsProcess = false;
+          await terminateOwnedGatewayProcess(child);
         }
 
         // Use the guarded start() flow so reconnect attempts cannot bypass

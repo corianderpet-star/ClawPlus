@@ -1,11 +1,12 @@
 /**
  * TitleBar Component
  * macOS: empty drag region (native traffic lights handled by hiddenInset).
- * Windows/Linux: icon + "ClawPlus" on left, minimize/maximize/close on right.
+ * Windows/Linux: icon + app name on left, minimize/maximize/close on right.
+ * Brand name and logo are read from src/lib/brand.ts (env-driven).
  */
 import { useState, useEffect } from 'react';
 import { Minus, Square, X, Copy } from 'lucide-react';
-import logoPng from '@/assets/logo.png';
+import { brandLogo, APP_NAME_DISPLAY } from '@/lib/brand';
 import { invokeIpc } from '@/lib/api-client';
 
 const isMac = window.electron?.platform === 'darwin';
@@ -49,9 +50,9 @@ function WindowsTitleBar() {
     <div className="drag-region flex h-10 shrink-0 items-center justify-between border-b bg-background">
       {/* Left: Icon + App Name */}
       <div className="no-drag flex items-center gap-2 pl-3">
-        <img src={logoPng} alt="clawPlus" className="h-5 w-auto" />
+        <img src={brandLogo} alt={APP_NAME_DISPLAY} className="h-5 w-auto" />
         <span className="text-xs font-medium text-muted-foreground select-none">
-          clawPlus
+          {APP_NAME_DISPLAY}
         </span>
       </div>
 

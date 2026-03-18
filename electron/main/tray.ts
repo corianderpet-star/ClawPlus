@@ -5,6 +5,7 @@
 import { Tray, Menu, BrowserWindow, app, nativeImage } from 'electron';
 import { join } from 'path';
 import { getSetting, setSetting } from '../utils/store';
+import { APP_NAME } from '../shared/brand';
 
 let tray: Tray | null = null;
 
@@ -58,7 +59,7 @@ export async function createTray(mainWindow: BrowserWindow): Promise<Tray> {
   tray = new Tray(icon);
   
   // Set tooltip
-  tray.setToolTip('ClawPlus - AI Assistant');
+  tray.setToolTip(`${APP_NAME} - AI Assistant`);
   
   const showWindow = () => {
     if (mainWindow.isDestroyed()) return;
@@ -70,7 +71,7 @@ export async function createTray(mainWindow: BrowserWindow): Promise<Tray> {
   const closeToTray = await getSetting('closeToTray');
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show ClawPlus',
+      label: `Show ${APP_NAME}`,
       click: showWindow,
     },
     {
@@ -143,7 +144,7 @@ export async function createTray(mainWindow: BrowserWindow): Promise<Tray> {
       type: 'separator',
     },
     {
-      label: 'Quit ClawPlus',
+      label: `Quit ${APP_NAME}`,
       click: () => {
         app.quit();
       },
@@ -178,7 +179,7 @@ export async function createTray(mainWindow: BrowserWindow): Promise<Tray> {
  */
 export function updateTrayStatus(status: string): void {
   if (tray) {
-    tray.setToolTip(`ClawPlus - ${status}`);
+    tray.setToolTip(`${APP_NAME} - ${status}`);
   }
 }
 
