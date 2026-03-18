@@ -1,6 +1,6 @@
 {
   "name": "ClawPlus",
-  "version": "0.1.24-alpha.17.1",
+  "version": "0.1.24-alpha.17.2",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@whiskeysockets/baileys",

@@ -2963,6 +2963,12 @@ function registerWorkflowHandlers(gatewayManager: GatewayManager): void {
     logger.warn('[workflow] Failed to inject gateway RPC:', err);
   });
 
+  import('../services/workflow/orchestration').then(({ orchestrator }) => {
+    orchestrator.setRpc((method, params, timeoutMs) => gatewayManager.rpc(method, params, timeoutMs));
+  }).catch((err) => {
+    logger.warn('[workflow] Failed to inject gateway RPC into orchestrator:', err);
+  });
+
   // List all saved workflows
   ipcMain.handle('workflow:list', async () => {
     try {
@@ -2987,6 +2993,27 @@ function registerWorkflowHandlers(gatewayManager: GatewayManager): void {
       return { success: false, error: String(err) };
     }
   });
+
+  ipcMain.handle(
+    'workflow:generate',
+    async (
+      _,
+      params: {
+        agentId: string;
+        messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+        approvalDecisions?: Array<{ approvalId: string; approved: boolean }>;
+        availableSkills?: Array<{ id: string; name: string; description?: string; enabled?: boolean }>;
+      },
+    ) => {
+      try {
+        const { generateWorkflowDraft } = await import('../services/workflow/workflow-generator');
+        return await generateWorkflowDraft(params);
+      } catch (err) {
+        logger.error('[workflow:generate] Error:', err);
+        return { success: false, error: String(err) };
+      }
+    },
+  );
 
   // Run a workflow
   ipcMain.handle('workflow:run', async (_, params: { workflow: unknown; triggerInput?: Record<string, unknown> }) => {

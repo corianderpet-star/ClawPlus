@@ -203,6 +203,8 @@ export interface SerializedEdge {
   sourceHandle?: string;
   targetHandle?: string;
   label?: string;
+  type?: string;
+  animated?: boolean;
 }
 
 // ── 执行上下文 ──────────────────────────────────────────────
@@ -244,4 +246,51 @@ export interface WorkflowCompleteEvent {
   success: boolean;
   results: Record<string, NodeRunResult>;
   durationMs: number;
+}
+
+export interface WorkflowGenerationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface WorkflowGenerationSkillOption {
+  id: string;
+  name: string;
+  description?: string;
+  enabled?: boolean;
+}
+
+export interface WorkflowGenerationApprovalDecision {
+  approvalId: string;
+  approved: boolean;
+}
+
+export interface WorkflowGenerationApproval {
+  id: string;
+  kind: 'skill';
+  title: string;
+  description: string;
+  nodeId?: string;
+  nodeLabel?: string;
+  skillId?: string;
+  skillName?: string;
+  available?: boolean;
+}
+
+export interface WorkflowGenerationRequest {
+  agentId: string;
+  messages: WorkflowGenerationMessage[];
+  approvalDecisions?: WorkflowGenerationApprovalDecision[];
+  availableSkills?: WorkflowGenerationSkillOption[];
+}
+
+export interface WorkflowGenerationResult {
+  success: boolean;
+  workflow?: WorkflowDefinition;
+  assistantReply?: string;
+  warnings?: string[];
+  approvals?: WorkflowGenerationApproval[];
+  requiresApproval?: boolean;
+  draftMode?: 'agent' | 'fallback';
+  error?: string;
 }

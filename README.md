@@ -275,6 +275,8 @@ Integrate AI into your development workflow. Use agents to review code, generate
 
 Chain multiple skills together to create sophisticated automation pipelines. Process data, transform content, and trigger actions—all orchestrated visually.
 The workflow editor can automatically tidy node layout when you save or run a flow, making branches and execution paths easier to scan.
+You can also open an AI drafting dialog, choose any configured agent, refine requirements through chat, preview the generated graph, and import it as a brand-new workflow in one click. When the draft wants to add a skill or another external capability, the app now pauses for approval first instead of importing it automatically.
+Implementation notes for the workflow generator and approval flow live in [`docs/workflow-ai-generation-analysis.md`](docs/workflow-ai-generation-analysis.md).
 
 ---
 

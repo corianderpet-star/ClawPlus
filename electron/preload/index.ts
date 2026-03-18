@@ -156,6 +156,7 @@ const electronAPI = {
         // Workflow
         'workflow:list',
         'workflow:save',
+        'workflow:generate',
         'workflow:run',
         'workflow:stop',
         'workflow:delete',

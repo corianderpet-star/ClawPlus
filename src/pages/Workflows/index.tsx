@@ -38,6 +38,8 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { useAgentsStore } from '@/stores/agents';
+import { useGatewayStore } from '@/stores/gateway';
 
 import {
   useWorkflowStore,
@@ -47,24 +49,11 @@ import {
 } from '@/stores/workflow';
 import type { WorkflowNodeData, WorkflowNodeType, WorkflowDefinition } from '@/types/workflow';
 
-import { TriggerNode } from './nodes/TriggerNode';
-import { AgentNode } from './nodes/AgentNode';
-import { SkillNode } from './nodes/SkillNode';
-import { LogicNode } from './nodes/LogicNode';
-import { OutputNode } from './nodes/OutputNode';
 import { NodeConfigPanel } from './NodeConfigPanel';
 import { LayoutDirectionProvider, type LayoutDirection } from './LayoutDirectionContext';
 import { autoLayoutWorkflow } from './autoLayout';
-
-// ── React Flow 自定义节点映射 ────────────────────────────
-
-const nodeTypes = {
-  trigger: TriggerNode,
-  agent: AgentNode,
-  skill: SkillNode,
-  logic: LogicNode,
-  output: OutputNode,
-};
+import { WorkflowGenerateDialog } from './WorkflowGenerateDialog';
+import { workflowNodeTypes } from './nodeTypes';
 
 // ── 调色板数据 ───────────────────────────────────────────
 
@@ -313,6 +302,7 @@ function WorkflowCanvas() {
   const workflows = useWorkflowStore((s) => s.workflows);
   const currentWorkflowId = useWorkflowStore((s) => s.currentWorkflowId);
   const createWorkflow = useWorkflowStore((s) => s.createWorkflow);
+  const importWorkflow = useWorkflowStore((s) => s.importWorkflow);
   const loadWorkflow = useWorkflowStore((s) => s.loadWorkflow);
   const saveWorkflow = useWorkflowStore((s) => s.saveWorkflow);
   const deleteWorkflow = useWorkflowStore((s) => s.deleteWorkflow);
@@ -321,10 +311,16 @@ function WorkflowCanvas() {
   const stopWorkflow = useWorkflowStore((s) => s.stopWorkflow);
   const isRunning = useWorkflowStore((s) => s.isRunning);
   const saving = useWorkflowStore((s) => s.saving);
+  const agents = useAgentsStore((s) => s.agents);
+  const currentAgentId = useAgentsStore((s) => s.currentAgentId);
+  const agentsLoaded = useAgentsStore((s) => s.isLoaded);
+  const loadAgents = useAgentsStore((s) => s.loadAgents);
+  const gatewayStatus = useGatewayStore((s) => s.status);
 
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [newWorkflowName, setNewWorkflowName] = useState('');
   const [showTriggerInput, setShowTriggerInput] = useState(false);
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [triggerMessage, setTriggerMessage] = useState('');
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('TB');
 
@@ -363,6 +359,22 @@ function WorkflowCanvas() {
   useEffect(() => {
     fetchWorkflows();
   }, [fetchWorkflows]);
+
+  useEffect(() => {
+    if (!agentsLoaded) {
+      loadAgents().catch(() => {});
+    }
+  }, [agentsLoaded, loadAgents]);
+
+  useEffect(() => {
+    if (!currentWorkflowId || nodes.length === 0) return;
+
+    const timer = setTimeout(() => {
+      reactFlowRef.current?.fitView({ padding: 0.18, duration: 350 });
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [currentWorkflowId, nodes.length]);
 
   // 注入内置教学模板工作流 (仅在列表为空或模板不存在时添加)
   useEffect(() => {
@@ -444,7 +456,7 @@ function WorkflowCanvas() {
         id: generateNodeId(),
         type,
         position,
-        data: createDefaultNodeData(type, t) as any,
+        data: createDefaultNodeData(type, t),
       };
 
       addNode(newNode);
@@ -465,6 +477,15 @@ function WorkflowCanvas() {
     autoLayout(layoutDirection);
     await saveWorkflow();
     toast.success(t('workflowSaved', 'Workflow saved'));
+  };
+
+  const handleImportGeneratedWorkflow = async (workflow: WorkflowDefinition) => {
+    const importedId = await importWorkflow(workflow);
+    if (!importedId) {
+      throw new Error(t('generateImportFailed', 'Failed to import workflow'));
+    }
+    setShowGenerateDialog(false);
+    toast.success(t('generateImported', 'Generated workflow imported'));
   };
 
   // 运行/停止
@@ -622,6 +643,15 @@ function WorkflowCanvas() {
             variant="outline"
             size="sm"
             className="h-7 gap-1.5 text-xs"
+            onClick={() => setShowGenerateDialog(true)}
+          >
+            <Sparkles className="h-3 w-3" />
+            {t('generate', 'Generate')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 gap-1.5 text-xs"
             onClick={handleSave}
             disabled={!currentWorkflowId || saving}
           >
@@ -643,6 +673,7 @@ function WorkflowCanvas() {
         {currentWorkflowId ? (
           <LayoutDirectionProvider value={layoutDirection}>
           <ReactFlow
+            key={currentWorkflowId}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -653,7 +684,7 @@ function WorkflowCanvas() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             onInit={(instance) => { reactFlowRef.current = instance; }}
-            nodeTypes={nodeTypes}
+            nodeTypes={workflowNodeTypes}
             defaultEdgeOptions={{ type: 'smoothstep', animated: false }}
             fitView
             snapToGrid
@@ -734,6 +765,15 @@ function WorkflowCanvas() {
           </div>
         </div>
       )}
+
+      <WorkflowGenerateDialog
+        open={showGenerateDialog}
+        agents={agents}
+        defaultAgentId={currentAgentId}
+        canGenerate={gatewayStatus.state === 'running'}
+        onClose={() => setShowGenerateDialog(false)}
+        onImport={handleImportGeneratedWorkflow}
+      />
     </div>
   );
 }

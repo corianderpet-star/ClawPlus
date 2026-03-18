@@ -60,6 +60,7 @@ interface WorkflowState {
 
   // ── 工作流 CRUD ─────────────────────────────────────
   createWorkflow: (name: string, description?: string) => string;
+  importWorkflow: (workflow: WorkflowDefinition) => Promise<string | null>;
   loadWorkflow: (id: string) => void;
   saveWorkflow: () => Promise<void>;
   deleteWorkflow: (id: string) => void;
@@ -77,6 +78,86 @@ interface WorkflowState {
 let nodeIdCounter = 0;
 export function generateNodeId(): string {
   return `node_${Date.now()}_${++nodeIdCounter}`;
+}
+
+function clearRuntimeState(data: WorkflowNodeData): WorkflowNodeData {
+  return {
+    ...data,
+    runStatus: undefined,
+    runResult: undefined,
+  };
+}
+
+function serializeNodes(nodes: WorkflowNode[]): WorkflowDefinition['nodes'] {
+  return nodes.map((node) => ({
+    id: node.id,
+    type: node.type!,
+    position: node.position,
+    data: clearRuntimeState(node.data),
+  }));
+}
+
+function serializeEdges(edges: WorkflowEdge[]): WorkflowDefinition['edges'] {
+  return edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    sourceHandle: edge.sourceHandle ?? undefined,
+    targetHandle: edge.targetHandle ?? undefined,
+    label: typeof edge.label === 'string' ? edge.label : undefined,
+    type: typeof edge.type === 'string' ? edge.type : 'smoothstep',
+    animated: typeof edge.animated === 'boolean' ? edge.animated : false,
+  }));
+}
+
+function hydrateNodes(nodes: WorkflowDefinition['nodes']): WorkflowNode[] {
+  return nodes.map((node) => ({
+    ...node,
+    data: clearRuntimeState(node.data),
+  })) as WorkflowNode[];
+}
+
+function hydrateEdges(edges: WorkflowDefinition['edges']): WorkflowEdge[] {
+  return edges.map((edge) => ({
+    ...edge,
+    sourceHandle: edge.sourceHandle ?? undefined,
+    targetHandle: edge.targetHandle ?? undefined,
+    label: edge.label ?? undefined,
+    type: typeof edge.type === 'string' ? edge.type : 'smoothstep',
+    animated: typeof edge.animated === 'boolean' ? edge.animated : false,
+  })) as WorkflowEdge[];
+}
+
+function ensureUniqueWorkflowId(baseId: string, workflows: WorkflowDefinition[]): string {
+  let candidate = baseId;
+  let suffix = 1;
+
+  while (workflows.some((workflow) => workflow.id === candidate)) {
+    candidate = `${baseId}_${suffix++}`;
+  }
+
+  return candidate;
+}
+
+function prepareImportedWorkflow(
+  workflow: WorkflowDefinition,
+  existingWorkflows: WorkflowDefinition[],
+): WorkflowDefinition {
+  const now = Date.now();
+  const baseId = workflow.id?.trim() || `wf_${now}`;
+  const id = ensureUniqueWorkflowId(baseId, existingWorkflows);
+
+  return {
+    ...workflow,
+    id,
+    name: workflow.name?.trim() || `Workflow ${existingWorkflows.length + 1}`,
+    description: workflow.description?.trim() || undefined,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    nodes: serializeNodes(hydrateNodes(workflow.nodes)),
+    edges: serializeEdges(hydrateEdges(workflow.edges)),
+  };
 }
 
 // ── Store 实现 ──────────────────────────────────────────
@@ -160,16 +241,38 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     return id;
   },
 
+  importWorkflow: async (workflow) => {
+    const existingWorkflows = get().workflows;
+    const importedWorkflow = prepareImportedWorkflow(workflow, existingWorkflows);
+    const nextWorkflows = [...existingWorkflows, importedWorkflow];
+
+    set({
+      saving: true,
+      workflows: nextWorkflows,
+      currentWorkflowId: importedWorkflow.id,
+      nodes: hydrateNodes(importedWorkflow.nodes),
+      edges: hydrateEdges(importedWorkflow.edges),
+      selectedNodeId: null,
+      nodeResults: {},
+    });
+
+    try {
+      await invokeIpc('workflow:save', { workflows: nextWorkflows }).catch(() => {
+        // 如果 IPC 尚未注册，静默忽略
+      });
+      return importedWorkflow.id;
+    } finally {
+      set({ saving: false });
+    }
+  },
+
   loadWorkflow: (id) => {
     const workflow = get().workflows.find((w) => w.id === id);
     if (!workflow) return;
     set({
       currentWorkflowId: id,
-      nodes: workflow.nodes.map((n) => ({
-        ...n,
-        data: { ...n.data, runStatus: undefined },
-      })) as WorkflowNode[],
-      edges: workflow.edges as WorkflowEdge[],
+      nodes: hydrateNodes(workflow.nodes),
+      edges: hydrateEdges(workflow.edges),
       selectedNodeId: null,
       nodeResults: {},
     });
@@ -186,20 +289,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
               ...w,
               updatedAt: Date.now(),
               version: w.version + 1,
-              nodes: nodes.map((n) => ({
-                id: n.id,
-                type: n.type!,
-                position: n.position,
-                data: n.data,
-              })),
-              edges: edges.map((e) => ({
-                id: e.id,
-                source: e.source,
-                target: e.target,
-                sourceHandle: e.sourceHandle ?? undefined,
-                targetHandle: e.targetHandle ?? undefined,
-                label: typeof e.label === 'string' ? e.label : undefined,
-              })),
+              nodes: serializeNodes(nodes),
+              edges: serializeEdges(edges),
             }
           : w,
       );
@@ -259,19 +350,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       await invokeIpc('workflow:run', {
         workflow: {
           ...workflow,
-          nodes: nodes.map((n) => ({
-            id: n.id,
-            type: n.type!,
-            position: n.position,
-            data: n.data,
-          })),
-          edges: edges.map((e) => ({
-            id: e.id,
-            source: e.source,
-            target: e.target,
-            sourceHandle: e.sourceHandle ?? undefined,
-            targetHandle: e.targetHandle ?? undefined,
-          })),
+          nodes: serializeNodes(nodes),
+          edges: serializeEdges(edges),
         },
         triggerInput: triggerInput ?? {},
       });
