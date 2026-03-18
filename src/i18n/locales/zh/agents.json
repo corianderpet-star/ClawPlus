@@ -163,6 +163,9 @@
     "soulPreview": "SOUL.md 预览",
     "importBtn": "导入智能体",
     "importing": "导入中...",
+    "installing": "安装中...",
+    "installAll": "全部安装",
+    "installAllHint": "点击\" 全部安装\"以安装所有缺失的技能，或逐个安装。",
     "idTaken": "智能体 ID \"{{id}}\" 已被占用，请选择其他 ID。",
     "importAgent": "导入模板"
   },

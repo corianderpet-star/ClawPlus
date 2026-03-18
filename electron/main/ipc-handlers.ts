@@ -145,6 +145,9 @@ export function registerIpcHandlers(
 
   // Migration / backup handlers
   registerMigrationHandlers(mainWindow);
+
+  // Workflow handlers (visual workflow editor)
+  registerWorkflowHandlers(gatewayManager);
 }
 
 type HostApiFetchRequest = {
@@ -2945,6 +2948,84 @@ function registerMigrationHandlers(mainWindow: BrowserWindow): void {
       };
     } catch (err) {
       logger.error('[migration:preview] Error:', err);
+      return { success: false, error: String(err) };
+    }
+  });
+}
+
+// ── Workflow Handlers ─────────────────────────────────────
+
+function registerWorkflowHandlers(gatewayManager: GatewayManager): void {
+  // Inject gateway RPC into workflow engine so agent nodes can call real agents
+  import('../services/workflow/workflow-engine').then(({ setGatewayRpc }) => {
+    setGatewayRpc((method, params, timeoutMs) => gatewayManager.rpc(method, params, timeoutMs));
+  }).catch((err) => {
+    logger.warn('[workflow] Failed to inject gateway RPC:', err);
+  });
+
+  // List all saved workflows
+  ipcMain.handle('workflow:list', async () => {
+    try {
+      const { getWorkflowStore } = await import('../services/workflow/workflow-store');
+      const store = await getWorkflowStore();
+      return store.get('workflows', []);
+    } catch (err) {
+      logger.error('[workflow:list] Error:', err);
+      return [];
+    }
+  });
+
+  // Save workflows
+  ipcMain.handle('workflow:save', async (_, params: { workflows: unknown[] }) => {
+    try {
+      const { getWorkflowStore } = await import('../services/workflow/workflow-store');
+      const store = await getWorkflowStore();
+      store.set('workflows', params.workflows);
+      return { success: true };
+    } catch (err) {
+      logger.error('[workflow:save] Error:', err);
+      return { success: false, error: String(err) };
+    }
+  });
+
+  // Run a workflow
+  ipcMain.handle('workflow:run', async (_, params: { workflow: unknown; triggerInput?: Record<string, unknown> }) => {
+    try {
+      const { runWorkflow } = await import('../services/workflow/workflow-engine');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await runWorkflow(params.workflow as any, params.triggerInput);
+      return { success: true, runId: result.runId, results: result.results };
+    } catch (err) {
+      logger.error('[workflow:run] Error:', err);
+      return { success: false, error: String(err) };
+    }
+  });
+
+  // Stop a running workflow
+  ipcMain.handle('workflow:stop', async (_, params: { runId: string }) => {
+    try {
+      const { stopWorkflow } = await import('../services/workflow/workflow-engine');
+      stopWorkflow(params.runId);
+      return { success: true };
+    } catch (err) {
+      logger.error('[workflow:stop] Error:', err);
+      return { success: false, error: String(err) };
+    }
+  });
+
+  // Delete a workflow
+  ipcMain.handle('workflow:delete', async (_, params: { id: string }) => {
+    try {
+      const { getWorkflowStore } = await import('../services/workflow/workflow-store');
+      const store = await getWorkflowStore();
+      const workflows = store.get('workflows', []) as Array<{ id: string }>;
+      store.set(
+        'workflows',
+        workflows.filter((w) => w.id !== params.id),
+      );
+      return { success: true };
+    } catch (err) {
+      logger.error('[workflow:delete] Error:', err);
       return { success: false, error: String(err) };
     }
   });

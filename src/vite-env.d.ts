@@ -5,7 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_BRAND: string;
   /** Formal product name: "ClawPlus" | "MoremeClaw" */
   readonly VITE_APP_NAME: string;
-  /** UI display name (camelCase): "clawPlus" | "moremeClaw" */
+  /** UI display name (camelCase): "clawPlus" | "MoremeClaw" */
   readonly VITE_APP_NAME_DISPLAY: string;
   /** One-line app description */
   readonly VITE_APP_DESCRIPTION: string;

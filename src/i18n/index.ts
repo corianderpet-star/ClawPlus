@@ -13,6 +13,7 @@ import enCron from './locales/en/cron.json';
 import enSetup from './locales/en/setup.json';
 import enAgents from './locales/en/agents.json';
 import enApprovals from './locales/en/approvals.json';
+import enWorkflows from './locales/en/workflows.json';
 
 // ZH
 import zhCommon from './locales/zh/common.json';
@@ -25,6 +26,7 @@ import zhCron from './locales/zh/cron.json';
 import zhSetup from './locales/zh/setup.json';
 import zhAgents from './locales/zh/agents.json';
 import zhApprovals from './locales/zh/approvals.json';
+import zhWorkflows from './locales/zh/workflows.json';
 
 // JA
 import jaCommon from './locales/ja/common.json';
@@ -37,6 +39,7 @@ import jaCron from './locales/ja/cron.json';
 import jaSetup from './locales/ja/setup.json';
 import jaAgents from './locales/ja/agents.json';
 import jaApprovals from './locales/ja/approvals.json';
+import jaWorkflows from './locales/ja/workflows.json';
 
 export const SUPPORTED_LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -58,6 +61,7 @@ const resources = {
         setup: enSetup,
         agents: enAgents,
         approvals: enApprovals,
+        workflows: enWorkflows,
     },
     zh: {
         common: zhCommon,
@@ -70,6 +74,7 @@ const resources = {
         setup: zhSetup,
         agents: zhAgents,
         approvals: zhApprovals,
+        workflows: zhWorkflows,
     },
     ja: {
         common: jaCommon,
@@ -82,6 +87,7 @@ const resources = {
         setup: jaSetup,
         agents: jaAgents,
         approvals: jaApprovals,
+        workflows: jaWorkflows,
     },
 };
 
@@ -92,7 +98,7 @@ i18n
         lng: 'en', // will be overridden by settings store
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup', 'agents', 'approvals'],
+        ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup', 'agents', 'approvals', 'workflows'],
         interpolation: {
             escapeValue: false, // React already escapes
             defaultVariables: {

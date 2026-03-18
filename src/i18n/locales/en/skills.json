@@ -95,5 +95,12 @@
     "emptyPrompt": "Search for new skills to expand your capabilities.",
     "noInstalled": "No marketplace skills installed yet.\nGo to \"Skill Store\" to browse and install new skills.",
     "searchError": "ClawHub search failed. Check your connection or installation."
+  },
+  "region": {
+    "global": "Global",
+    "china": "China",
+    "tooltip": "Switch skill store region",
+    "switchedToChina": "Switched to China region (SkillHub accelerated).",
+    "switchedToGlobal": "Switched to Global region (ClawHub)."
   }
 }

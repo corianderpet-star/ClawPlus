@@ -13,6 +13,7 @@ import {
   X, Download, Loader2, ChevronRight, AlertTriangle,
   CheckCircle2, Package, ArrowLeft,
   Shield, ShieldCheck, Code, Eye, MessageSquare, ShieldOff, XCircle,
+  Crown, Boxes, Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +81,7 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
 
   const skills = useSkillsStore((s) => s.skills);
   const fetchSkills = useSkillsStore((s) => s.fetchSkills);
+  const installSkill = useSkillsStore((s) => s.installSkill);
 
   const [step, setStep] = useState<DialogStep>('browse');
   const [selectedTemplate, setSelectedTemplate] = useState<AgentTemplate | null>(null);
@@ -87,6 +89,15 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
   const [customName, setCustomName] = useState('');
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 层级选择状态
+  const [customRole, setCustomRole] = useState<'lead' | 'sub' | undefined>(undefined);
+  const [customParentId, setCustomParentId] = useState<string | undefined>(undefined);
+  const [allowCrossComm, setAllowCrossComm] = useState(false);
+
+  // 技能安装状态
+  const [installingSkills, setInstallingSkills] = useState<Set<string>>(new Set());
+  const [installedSkills, setInstalledSkills] = useState<Set<string>>(new Set());
 
   const lang = i18n.language;
 
@@ -97,6 +108,11 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
       setStep('browse');
       setSelectedTemplate(null);
       setError(null);
+      setCustomRole(undefined);
+      setCustomParentId(undefined);
+      setAllowCrossComm(false);
+      setInstallingSkills(new Set());
+      setInstalledSkills(new Set());
     }
   }, [open, fetchSkills]);
 
@@ -117,6 +133,10 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
     setSelectedTemplate(template);
     setCustomId(template.suggestedId);
     setCustomName(getTemplateName(template, lang));
+    setCustomRole(template.role);
+    setCustomParentId(undefined);
+    setAllowCrossComm(false);
+    setInstalledSkills(new Set());
     setError(null);
     setStep('detail');
   }, [lang]);
@@ -129,7 +149,9 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
 
   const handleImport = useCallback(async () => {
     if (!selectedTemplate) return;
-    if (missingSkills.length > 0) {
+    // 仍有未安装的必要技能时阻止导入
+    const stillMissing = missingSkills.filter((s) => !installedSkills.has(s));
+    if (stillMissing.length > 0) {
       setError(t('agents:import.missingSkillsError'));
       return;
     }
@@ -153,7 +175,9 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
         description: getTemplateDescription(selectedTemplate, lang),
         model: selectedTemplate.model,
         soulMd: selectedTemplate.soulMd,
-        role: selectedTemplate.role,
+        role: customRole,
+        parentId: customRole === 'sub' ? customParentId : undefined,
+        allowCrossComm: customRole === 'lead' ? allowCrossComm : undefined,
         emoji: selectedTemplate.emoji,
       };
 
@@ -179,7 +203,7 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
     } finally {
       setImporting(false);
     }
-  }, [selectedTemplate, customId, customName, missingSkills, isIdTaken, lang, createAgent, onImported, onClose, t]);
+  }, [selectedTemplate, customId, customName, customRole, customParentId, allowCrossComm, missingSkills, installedSkills, isIdTaken, lang, createAgent, onImported, onClose, t]);
 
   const handleClose = useCallback(() => {
     if (importing) return;
@@ -300,6 +324,66 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
                 </div>
               </div>
 
+              {/* 层级角色选择 */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold">{t('agents:form.role')}</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setCustomRole(customRole === 'lead' ? undefined : 'lead'); setCustomParentId(undefined); }}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${customRole === 'lead' ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+                  >
+                    <Crown className={`h-6 w-6 ${customRole === 'lead' ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                    <span className="text-sm font-medium">{t('agents:form.roleLead')}</span>
+                    <span className="text-[10px] text-muted-foreground text-center">{t('agents:form.roleLeadDesc')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setCustomRole(customRole === 'sub' ? undefined : 'sub'); }}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors ${customRole === 'sub' ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-transparent bg-muted/30 hover:bg-muted/50'}`}
+                  >
+                    <Boxes className={`h-6 w-6 ${customRole === 'sub' ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                    <span className="text-sm font-medium">{t('agents:form.roleSub')}</span>
+                    <span className="text-[10px] text-muted-foreground text-center">{t('agents:form.roleSubDesc')}</span>
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('agents:form.roleHint')}</p>
+
+                {/* 上级智能体选择 (Sub 模式) */}
+                {customRole === 'sub' && agents.filter((a) => a.id !== 'main' && a.role !== 'sub').length > 0 && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">{t('agents:form.parentAgent')}</label>
+                    <select
+                      value={customParentId || ''}
+                      onChange={(e) => setCustomParentId(e.target.value || undefined)}
+                      className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    >
+                      <option value="">{t('agents:form.selectParent')}</option>
+                      {agents.filter((a) => a.id !== 'main' && a.role !== 'sub').map((a) => (
+                        <option key={a.id} value={a.id}>{a.identity?.emoji || '🤖'} {a.name || a.id}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* 跨 Agent 通信 (Lead 模式) */}
+                {customRole === 'lead' && (
+                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/30 transition-colors">
+                    <Users className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{t('agents:form.crossComm')}</p>
+                      <p className="text-xs text-muted-foreground">{t('agents:form.crossCommDesc')}</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={allowCrossComm}
+                      onChange={(e) => setAllowCrossComm(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </label>
+                )}
+              </div>
+
               {/* Template Config Summary */}
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold">{t('agents:import.configSummary')}</h4>
@@ -411,13 +495,14 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
                 )}
               </div>
 
-              {/* Skill Dependencies */}
+              {/* Skill Dependencies — 支持一键安装 */}
               {selectedTemplate.requiredSkills && selectedTemplate.requiredSkills.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold">{t('agents:import.requiredSkills')}</h4>
                   <div className="space-y-1">
                     {selectedTemplate.requiredSkills.map((slug) => {
-                      const installed = skills.some((s) => (s.slug || s.id) === slug);
+                      const installed = skills.some((s) => (s.slug || s.id) === slug) || installedSkills.has(slug);
+                      const isInstalling = installingSkills.has(slug);
                       return (
                         <div key={slug} className="flex items-center gap-2 rounded-md border px-3 py-2">
                           <Package className="h-3.5 w-3.5 text-muted-foreground" />
@@ -427,28 +512,82 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
                               <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
                               {t('agents:import.installed')}
                             </Badge>
-                          ) : (
-                            <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                              <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
-                              {t('agents:import.notInstalled')}
+                          ) : isInstalling ? (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                              <Loader2 className="h-2.5 w-2.5 mr-0.5 animate-spin" />
+                              {t('agents:import.installing')}
                             </Badge>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 text-[10px] px-2"
+                              onClick={async () => {
+                                setInstallingSkills((prev) => new Set(prev).add(slug));
+                                try {
+                                  await installSkill(slug);
+                                  setInstalledSkills((prev) => new Set(prev).add(slug));
+                                  // 刷新技能列表
+                                  await fetchSkills();
+                                } catch {
+                                  // 安装失败时保持原状
+                                } finally {
+                                  setInstallingSkills((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(slug);
+                                    return next;
+                                  });
+                                }
+                              }}
+                            >
+                              <Download className="h-2.5 w-2.5 mr-0.5" />
+                              {t('common:actions.install')}
+                            </Button>
                           )}
                         </div>
                       );
                     })}
                   </div>
-                  {missingSkills.length > 0 && (
+                  {missingSkills.filter((s) => !installedSkills.has(s)).length > 0 && (
                     <div className="rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-3 py-2">
                       <div className="flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                        <div>
+                        <div className="flex-1">
                           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                            {t('agents:import.missingSkillsWarning', { count: missingSkills.length })}
+                            {t('agents:import.missingSkillsWarning', { count: missingSkills.filter((s) => !installedSkills.has(s)).length })}
                           </p>
                           <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
-                            {t('agents:import.missingSkillsHint')}
+                            {t('agents:import.installAllHint')}
                           </p>
                         </div>
+                        {/* 一键安装所有缺失技能 */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30"
+                          disabled={installingSkills.size > 0}
+                          onClick={async () => {
+                            const toInstall = missingSkills.filter((s) => !installedSkills.has(s));
+                            setInstallingSkills(new Set(toInstall));
+                            for (const slug of toInstall) {
+                              try {
+                                await installSkill(slug);
+                                setInstalledSkills((prev) => new Set(prev).add(slug));
+                              } catch {
+                                // 继续安装下一个
+                              }
+                            }
+                            setInstallingSkills(new Set());
+                            await fetchSkills();
+                          }}
+                        >
+                          {installingSkills.size > 0 ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Download className="h-3 w-3 mr-1" />
+                          )}
+                          {t('agents:import.installAll')}
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -487,7 +626,7 @@ export function ImportAgentDialog({ open, onClose, onImported }: ImportAgentDial
             <Button
               size="sm"
               onClick={handleImport}
-              disabled={importing || saving || isIdTaken || missingSkills.length > 0}
+              disabled={importing || saving || isIdTaken || missingSkills.filter((s) => !installedSkills.has(s)).length > 0}
             >
               {importing || saving ? (
                 <>

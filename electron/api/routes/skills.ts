@@ -9,6 +9,13 @@ export async function handleSkillRoutes(
   url: URL,
   ctx: HostApiContext,
 ): Promise<boolean> {
+  // Sync region setting with ClawHub service on each request
+  try {
+    const { getSetting } = await import('../../utils/store');
+    const region = (await getSetting('skillStoreRegion')) as string;
+    ctx.clawHubService.setRegion(region === 'china' ? 'china' : 'global');
+  } catch { /* default to global */ }
+
   if (url.pathname === '/api/skills/configs' && req.method === 'GET') {
     sendJson(res, 200, await getAllSkillConfigs());
     return true;

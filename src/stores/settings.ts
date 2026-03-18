@@ -48,6 +48,9 @@ interface SettingsState {
   // Setup
   setupComplete: boolean;
 
+  // Skill Store
+  skillStoreRegion: 'global' | 'china';
+
   // Actions
   init: () => Promise<void>;
   setTheme: (theme: Theme) => void;
@@ -73,6 +76,7 @@ interface SettingsState {
   setBackgroundOpacity: (value: number) => void;
   setBackgroundBlur: (value: number) => void;
   markSetupComplete: () => void;
+  setSkillStoreRegion: (region: 'global' | 'china') => void;
   resetSettings: () => void;
 }
 
@@ -105,6 +109,7 @@ const defaultSettings = {
   backgroundOpacity: 0.3,
   backgroundBlur: 0,
   setupComplete: false,
+  skillStoreRegion: 'global' as 'global' | 'china',
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -167,6 +172,13 @@ export const useSettingsStore = create<SettingsState>()(
       setBackgroundOpacity: (backgroundOpacity) => set({ backgroundOpacity }),
       setBackgroundBlur: (backgroundBlur) => set({ backgroundBlur }),
       markSetupComplete: () => set({ setupComplete: true }),
+      setSkillStoreRegion: (skillStoreRegion) => {
+        set({ skillStoreRegion });
+        void hostApiFetch('/api/settings/skillStoreRegion', {
+          method: 'PUT',
+          body: JSON.stringify({ value: skillStoreRegion }),
+        }).catch(() => {});
+      },
       resetSettings: () => set(defaultSettings),
     }),
     {

@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   Bot,
   ShieldCheck,
+  Workflow,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings';
@@ -196,6 +197,7 @@ export function Sidebar() {
     { to: '/cron', icon: <Clock className="h-[18px] w-[18px]" strokeWidth={2} />, label: t('sidebar.cronTasks') },
     { to: '/dashboard', icon: <LayoutDashboard className="h-[18px] w-[18px]" strokeWidth={2} />, label: t('sidebar.dashboard') },
     { to: '/agents', icon: <Bot className="h-[18px] w-[18px]" strokeWidth={2} />, label: t('sidebar.agents') },
+    { to: '/workflows', icon: <Workflow className="h-[18px] w-[18px]" strokeWidth={2} />, label: t('sidebar.workflows') },
     ...(approvalsVisible
       ? [{ to: '/approvals', icon: <ShieldCheck className="h-[18px] w-[18px]" strokeWidth={2} />, label: t('sidebar.approvals') }]
       : []),

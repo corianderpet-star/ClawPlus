@@ -22,6 +22,7 @@ import { Models } from './pages/Models';
 import { Settings } from './pages/Settings';
 import { Setup } from './pages/Setup';
 import { Skills } from './pages/Skills';
+import { Workflows } from './pages/Workflows';
 import { useGatewayStore } from './stores/gateway';
 import { useSettingsStore } from './stores/settings';
 
@@ -189,6 +190,7 @@ function App() {
             <Route path="/skills" element={<Skills />} />
             <Route path="/cron" element={<Cron />} />
             <Route path="/agents" element={<Agents />} />
+            <Route path="/workflows" element={<Workflows />} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/settings/*" element={<Settings />} />
           </Route>

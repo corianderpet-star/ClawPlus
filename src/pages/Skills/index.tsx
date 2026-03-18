@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useSkillsStore } from '@/stores/skills';
 import { useGatewayStore } from '@/stores/gateway';
+import { useSettingsStore } from '@/stores/settings';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { cn } from '@/lib/utils';
 import { invokeIpc } from '@/lib/api-client';
@@ -345,6 +346,8 @@ export function Skills() {
   } = useSkillsStore();
   const { t } = useTranslation('skills');
   const gatewayStatus = useGatewayStore((state) => state.status);
+  const skillStoreRegion = useSettingsStore((s) => s.skillStoreRegion);
+  const setSkillStoreRegion = useSettingsStore((s) => s.setSkillStoreRegion);
   const [searchQuery, setSearchQuery] = useState('');
   const [marketplaceQuery, setMarketplaceQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
@@ -677,6 +680,25 @@ export function Skills() {
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
             </Button>
+            <button
+              onClick={() => {
+                const newRegion = skillStoreRegion === 'china' ? 'global' : 'china';
+                setSkillStoreRegion(newRegion);
+                toast.success(t(newRegion === 'china' ? 'region.switchedToChina' : 'region.switchedToGlobal'));
+                // Reset marketplace discovery so next store tab visit re-fetches
+                marketplaceDiscoveryAttemptedRef.current = false;
+              }}
+              className={cn(
+                'h-8 px-3 rounded-md text-[12px] font-medium transition-colors border flex items-center gap-1.5',
+                skillStoreRegion === 'china'
+                  ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50'
+                  : 'border-black/10 dark:border-white/10 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+              )}
+              title={t('region.tooltip')}
+            >
+              {skillStoreRegion === 'china' ? '🇨🇳' : '🌐'}
+              <span className="hidden sm:inline">{skillStoreRegion === 'china' ? t('region.china') : t('region.global')}</span>
+            </button>
           </div>
         </div>
 
@@ -794,7 +816,11 @@ export function Skills() {
                       <div
                         key={skill.slug}
                         className="group flex flex-row items-center justify-between py-3.5 px-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-black/5 dark:border-white/5 last:border-0"
-                        onClick={() => invokeIpc('shell:openExternal', `https://clawhub.ai/s/${skill.slug}`)}
+                        onClick={() => invokeIpc('shell:openExternal',
+                          skillStoreRegion === 'china'
+                            ? `https://skillhub.tencent.com/`
+                            : `https://clawhub.ai/s/${skill.slug}`
+                        )}
                       >
                         <div className="flex items-start gap-4 flex-1 overflow-hidden pr-4">
                           <div className="h-10 w-10 shrink-0 flex items-center justify-center text-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-xl overflow-hidden">

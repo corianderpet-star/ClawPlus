@@ -39,6 +39,7 @@ export class ClawHubService {
     private cliEntryPath: string;
     private useNodeRunner: boolean;
     private ansiRegex: RegExp;
+    private region: 'global' | 'china' = 'global';
 
     /* ── Rate-limit / throttle infrastructure ── */
 
@@ -80,6 +81,20 @@ export class ClawHubService {
         const csi = String.fromCharCode(155);
         const pattern = `(?:${esc}|${csi})[[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]`;
         this.ansiRegex = new RegExp(pattern, 'g');
+    }
+
+    /** Switch skill store region (global vs china). Clears all caches. */
+    setRegion(region: 'global' | 'china'): void {
+        if (this.region === region) return;
+        this.region = region;
+        this.listCache = null;
+        this.exploreCache = null;
+        this.searchCache.clear();
+        console.log(`[ClawHub] Region set to: ${region}`);
+    }
+
+    getRegion(): 'global' | 'china' {
+        return this.region;
     }
 
     private stripAnsi(line: string): string {
@@ -131,7 +146,7 @@ export class ClawHubService {
             const isWin = process.platform === 'win32';
             const useShell = isWin && !this.useNodeRunner;
             const { NODE_OPTIONS: _nodeOptions, ...baseEnv } = process.env;
-            const env = {
+            const env: Record<string, string | undefined> = {
                 ...baseEnv,
                 CI: 'true',
                 FORCE_COLOR: '0',
@@ -147,6 +162,12 @@ export class ClawHubService {
                 env: {
                     ...env,
                     CLAWHUB_WORKDIR: this.workDir,
+                    // When region is china, set mirror env vars that the CLI may honour
+                    ...(this.region === 'china' ? {
+                        CLAWHUB_MIRROR: 'https://skillhub-1388575217.cos.ap-guangzhou.myqcloud.com',
+                        CLAWHUB_REGISTRY: 'https://skillhub-1388575217.cos.ap-guangzhou.myqcloud.com',
+                        SKILLHUB_ACCELERATE: '1',
+                    } : {}),
                 },
                 windowsHide: true,
             });

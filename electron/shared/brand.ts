@@ -25,7 +25,7 @@ export const BRAND: BrandId = (import.meta.env.VITE_BRAND || 'imoreme') as Brand
 /** Formal product name: "ClawPlus" | "MoremeClaw" */
 export const APP_NAME: string = import.meta.env.VITE_APP_NAME || 'ClawPlus';
 
-/** UI display name (camelCase): "clawPlus" | "moremeClaw" */
+/** UI display name (camelCase): "clawPlus" | "MoremeClaw" */
 export const APP_NAME_DISPLAY: string = import.meta.env.VITE_APP_NAME_DISPLAY || 'clawPlus';
 
 /** One-line description */

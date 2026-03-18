@@ -95,5 +95,12 @@
     "emptyPrompt": "搜索新技能以扩展您的能力。",
     "noInstalled": "暂无从市场安装的技能。\n前往「技能市场」浏览和安装新技能。",
     "searchError": "ClawHub 搜索失败。请检查您的连接或安装。"
+  },
+  "region": {
+    "global": "国际",
+    "china": "国内加速",
+    "tooltip": "切换技能市场地区",
+    "switchedToChina": "已切换到国内环境（SkillHub 加速）。",
+    "switchedToGlobal": "已切换到国际环境（ClawHub）。"
   }
 }

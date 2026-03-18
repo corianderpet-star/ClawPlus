@@ -163,6 +163,9 @@
     "soulPreview": "SOUL.md Preview",
     "importBtn": "Import Agent",
     "importing": "Importing...",
+    "installing": "Installing...",
+    "installAll": "Install All",
+    "installAllHint": "Click \"Install All\" to install all missing skills, or install them individually.",
     "idTaken": "Agent ID \"{{id}}\" is already in use. Please choose a different ID.",
     "importAgent": "Import Template"
   },

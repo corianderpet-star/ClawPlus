@@ -46,6 +46,6 @@ Standard dev commands are in `package.json` scripts and `README.md`. Key ones:
   - Brand-specific env vars live in `.env.imoreme` and `.env.moreme` (tracked in git). All use `VITE_` prefix.
   - Brand-specific assets (logo, icons) live under `src/assets/brands/<brand>/` and `resources/brands/<brand>/`.
   - The i18n files use `{{appName}}` interpolation; the default value is set in `src/i18n/index.ts` from the brand config.
-  - **Do not hardcode** "ClawPlus", "clawPlus", "MoremeClaw", or "moremeClaw" in UI-facing code; always use `APP_NAME` / `APP_NAME_DISPLAY` from the brand module.
+  - **Do not hardcode** "ClawPlus", "clawPlus", "MoremeClaw", or "MoremeClaw" in UI-facing code; always use `APP_NAME` / `APP_NAME_DISPLAY` from the brand module.
   - electron-builder configs: `electron-builder.yml` (imoreme/ClawPlus) and `electron-builder.moreme.yml` (moreme/MoremeClaw).
   - Build script: `scripts/build-brand.mjs` handles icon copying + vite build + bundling + packaging in one step.

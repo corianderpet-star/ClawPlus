@@ -153,6 +153,12 @@ const electronAPI = {
         'automation:updateConfig',
         'automation:getReloadMode',
         'automation:setReloadMode',
+        // Workflow
+        'workflow:list',
+        'workflow:save',
+        'workflow:run',
+        'workflow:stop',
+        'workflow:delete',
       ];
 
       if (validChannels.includes(channel)) {
@@ -193,6 +199,8 @@ const electronAPI = {
         'openclaw:cli-installed',
         'openclaw:update-progress',
         'migration:progress',
+        'workflow:nodeEvent',
+        'workflow:complete',
       ];
 
       if (validChannels.includes(channel)) {

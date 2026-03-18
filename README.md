@@ -274,6 +274,7 @@ Integrate AI into your development workflow. Use agents to review code, generate
 ### 🔄 Workflow Automation
 
 Chain multiple skills together to create sophisticated automation pipelines. Process data, transform content, and trigger actions—all orchestrated visually.
+The workflow editor can automatically tidy node layout when you save or run a flow, making branches and execution paths easier to scan.
 
 ---
 

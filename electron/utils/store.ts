@@ -58,6 +58,7 @@ export interface AppSettings {
   selectedBundles: string[];
   enabledSkills: string[];
   disabledSkills: string[];
+  skillStoreRegion: 'global' | 'china';
 }
 
 /**
@@ -102,6 +103,7 @@ const defaults: AppSettings = {
   selectedBundles: ['productivity', 'developer'],
   enabledSkills: [],
   disabledSkills: [],
+  skillStoreRegion: 'global',
 };
 
 /**
